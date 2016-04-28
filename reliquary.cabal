@@ -16,7 +16,7 @@ version:             0.1.0.0
 synopsis:            Concatenative language with macros
 
 -- A longer description of the package.
--- description:         
+description:         Concatenative language with macros
 
 -- The license under which the package is released.
 license:             MIT
@@ -57,7 +57,9 @@ executable reliquary
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.8 && <4.9
+  build-depends:       base >=4.8 && <4.9,
+                       parsec,
+                       mtl
   
   -- Directories containing source files.
   hs-source-dirs:      src
