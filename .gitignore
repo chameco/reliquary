@@ -13,3 +13,6 @@ cabal.config
 *.prof
 *.hp
 *.aux
+
+Session.vim
+reliquary
