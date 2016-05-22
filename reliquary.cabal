@@ -45,7 +45,6 @@ build-type:          Simple
 -- Constraint on the version of Cabal needed to build this package.
 cabal-version:       >=1.10
 
-
 executable reliquary
   -- .hs or .lhs file containing the Main module.
   main-is:             Main.hs
@@ -57,7 +56,8 @@ executable reliquary
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.8 && <4.9,
+  build-depends:       base,
+                       containers,
                        parsec,
                        mtl
   
