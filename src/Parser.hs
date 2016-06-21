@@ -12,6 +12,7 @@ import Model
 parseProgram :: Parser Expr
 parseProgram = extractBlock <$> parseBlock  where
     extractBlock (Block exprs) = Program exprs
+    extractBlock _ = undefined
 
 parseExpr :: Parser Expr
 parseExpr = parseWord <|>
@@ -34,3 +35,4 @@ parseDefinition :: Parser Expr
 parseDefinition = char '@' *> (extractWord <$> (spaces *> parseWord <* spaces))
         <*> (spaces *> parseExpr <* spaces) where
             extractWord (Word w) = Definition w
+            extractWord _ = undefined

@@ -16,3 +16,5 @@ cabal.config
 
 Session.vim
 reliquary
+.stack-work
+library
