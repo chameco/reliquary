@@ -1,3 +1,5 @@
+{-# LANGUAGE GADTs #-}
+
 module Evaluate where
 
 import qualified Data.Map as Map
@@ -6,69 +8,82 @@ import Control.Arrow (first, second)
 
 import Model
 
-data StackFunction = Pure (([StackFunction], Map.Map String StackFunction) -> ([StackFunction], Map.Map String StackFunction))
-                   | Impure Integer
+type Context a = ([StackFunction a], Map.Map String (StackFunction a))
+
+class Purifiable a where
+        purify :: a -> StackFunction a
+
+data StackFunction a where 
+        Pure :: (Context a -> Context a) -> StackFunction a
+        Impure :: Purifiable a => a -> StackFunction a
+        Error :: String -> StackFunction a
+
+instance Show (StackFunction a) where
+        show (Pure _) = "Pure"
+        show (Impure _) = "Impure"
+        show (Error msg) = "Error (" ++ msg ++ ")"
+
+instance Purifiable Integer where
+        purify = churchNum
 
 -- Helper Functions
-call :: StackFunction -> ([StackFunction], Map.Map String StackFunction) -> ([StackFunction], Map.Map String StackFunction)
+call :: StackFunction a -> Context a -> Context a
 call (Pure f) = f
-call (Impure n) = call $ churchNum n
+call (Impure n) = call $ purify n
+call (Error msg) = first ((:) (Error msg))
 
-compose :: StackFunction -> StackFunction -> StackFunction
+compose :: StackFunction a -> StackFunction a -> StackFunction a
 compose f g = Pure (call f . call g)
 
-numValue :: StackFunction -> Maybe Integer
+numValue :: StackFunction Integer -> Maybe Integer
 numValue (Pure f) = case f ([Pure realAdd, Impure 0], Map.empty) of (Impure res:stack, symtab) -> Just res
                                                                     _ -> Nothing
                                                                     where realAdd (Impure x:stack, symtab) = (Impure (x + 1):stack, symtab)
                                                                           realAdd x = x
 numValue (Impure r) = Just r
+numValue (Error _) = Nothing
 
-printStackFunction :: StackFunction -> IO ()
-printStackFunction (Pure _) = putStr "Pure"
-printStackFunction (Impure n) = putStr $ show n
-
-printStack :: [StackFunction] -> IO ()
+printStack :: [StackFunction a] -> IO ()
 printStack stack = foldl combine (putStr "[") stack >> putStrLn "]" where
-    combine left right = left >>= \_ -> printStackFunction right >>= \_ -> putStr ", "
+    combine left right = left >>= \_ -> putStr (show right) >>= \_ -> putStr ", "
 
 -- Basic Operations
-stackCall :: StackFunction
+stackCall :: StackFunction a
 stackCall = Pure $ \(f:stack, symtab) -> call f (stack, symtab)
 
-stackCompose :: StackFunction
+stackCompose :: StackFunction a
 stackCompose = Pure $ \(f:g:stack, symtab) -> (compose f g:stack, symtab)
 
-stackDrop :: StackFunction
+stackDrop :: StackFunction a
 stackDrop = Pure $ \(x:stack, symtab) -> (stack, symtab)
 
-stackSwap :: StackFunction
+stackSwap :: StackFunction a
 stackSwap = Pure $ \(x:y:stack, symtab) -> (y:x:stack, symtab)
 
 -- Church Encoding
-churchZero :: StackFunction
+churchZero :: StackFunction a
 churchZero = stackDrop
 
-churchSucc :: StackFunction
+churchSucc :: StackFunction a
 churchSucc = Pure $ \(Pure n:s, st) -> ((Pure $ \(Pure f:stack, symtab) -> case n (Pure f:stack, symtab) of
                                                                                (stack', symtab') -> f (stack', symtab')):s, st)
 
-churchTrue :: StackFunction
+churchTrue :: StackFunction a
 churchTrue = compose stackDrop stackSwap
 
-churchFalse :: StackFunction
+churchFalse :: StackFunction a
 churchFalse = stackDrop
 
-churchAdd :: StackFunction
+churchAdd :: StackFunction a
 churchAdd = Pure $ \(Pure n:s, st) -> n (churchSucc:s, st)
 
-churchNum :: Integer -> StackFunction
+churchNum :: Integer -> StackFunction a
 churchNum n = head $ fst $ call (foldr (\_ -> compose churchSucc) (Pure id) [1..n]) ([churchZero], Map.empty)
 
-compileExpr :: Expr -> StackFunction
+compileExpr :: Expr -> StackFunction a
 compileExpr (Program exprs) = foldr (flip compose . compileExpr) (Pure id) exprs
 compileExpr (Word s) = Pure $ \(stack, symtab) -> case Map.lookup s symtab of Just g -> call g (stack, symtab)
                                                                               Nothing -> (stack, symtab)
-compileExpr (Literal n) = churchNum n
+compileExpr (Literal n) = Pure $ first $ (:) $ churchNum n
 compileExpr (Block exprs) = Pure $ first $ (:) (foldr (flip compose . compileExpr) (Pure id) exprs)
 compileExpr (Definition s expr) = Pure $ second $ Map.insert s (compileExpr expr)

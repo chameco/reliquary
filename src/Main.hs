@@ -18,4 +18,6 @@ main = do
         let prog = runParser parseProgram () f s in
             case prog of
                 Left err -> print err
-                Right tree -> print tree
+                Right tree -> case numValue $ head $ fst $ call (compileExpr tree) ([], Map.fromList [("plus", churchAdd)]) of
+                                  Just n -> print n
+                                  Nothing -> print "Error"
