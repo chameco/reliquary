@@ -18,12 +18,12 @@ parseExpr :: Parser Expr
 parseExpr = parseWord <|>
             parseLiteral <|>
             char '[' *> parseBlock <* char ']' <|>
-            parseDefinition
+            char '@' *> parseDefinition <* char ';'
 
 parseWord :: Parser Expr
 parseWord = Word <$>
         ((:) <$> (letter <|> special) <*> many (alphaNum <|> special)) where
-            special = oneOf "~`!$%^&*_-+=|\\;<>?/"
+            special = oneOf "~`!$%^&*_-+=|\\<>?/"
 
 parseLiteral :: Parser Expr
 parseLiteral = Literal . read <$> many1 digit
@@ -32,7 +32,8 @@ parseBlock :: Parser Expr
 parseBlock = Block <$> many (parseExpr <* spaces) 
 
 parseDefinition :: Parser Expr
-parseDefinition = char '@' *> (extractWord <$> (spaces *> parseWord <* spaces))
-        <*> (spaces *> parseExpr <* spaces) where
+parseDefinition =
+        (extractWord <$> (spaces *> parseWord <* spaces)) <*>
+        (spaces *> parseProgram <* spaces) where
             extractWord (Word w) = Definition w
             extractWord _ = undefined

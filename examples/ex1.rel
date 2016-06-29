@@ -1,0 +1,5 @@
+@add4 [plus] 3 call;
+@zero [drop];
+@one [call];
+
+zero 1 zero one add4

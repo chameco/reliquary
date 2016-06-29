@@ -11,6 +11,16 @@ import Text.Parsec.Prim
 import Parser
 import Evaluate
 
+defaultContext :: Context Integer
+defaultContext = ([],
+                 Map.fromList [
+                              ("call", stackCall),
+                              ("compose", stackCompose),
+                              ("drop", stackDrop),
+                              ("swap", stackSwap),
+                              ("plus", churchAdd)
+                              ])
+
 main :: IO ()
 main = do
         [f] <- getArgs
@@ -18,6 +28,7 @@ main = do
         let prog = runParser parseProgram () f s in
             case prog of
                 Left err -> print err
-                Right tree -> case numValue $ head $ fst $ call (compileExpr tree) ([], Map.fromList [("plus", churchAdd)]) of
-                                  Just n -> print n
-                                  Nothing -> print "Error"
+                Right tree -> let res = call (compileExpr tree) defaultContext in
+                    case numValue (head $ fst res) res of
+                        Just n -> print n
+                        Nothing -> print "Error"

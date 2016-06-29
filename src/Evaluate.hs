@@ -16,12 +16,10 @@ class Purifiable a where
 data StackFunction a where 
         Pure :: (Context a -> Context a) -> StackFunction a
         Impure :: Purifiable a => a -> StackFunction a
-        Error :: String -> StackFunction a
 
 instance Show (StackFunction a) where
         show (Pure _) = "Pure"
         show (Impure _) = "Impure"
-        show (Error msg) = "Error (" ++ msg ++ ")"
 
 instance Purifiable Integer where
         purify = churchNum
@@ -30,22 +28,16 @@ instance Purifiable Integer where
 call :: StackFunction a -> Context a -> Context a
 call (Pure f) = f
 call (Impure n) = call $ purify n
-call (Error msg) = first ((:) (Error msg))
 
 compose :: StackFunction a -> StackFunction a -> StackFunction a
 compose f g = Pure (call f . call g)
 
-numValue :: StackFunction Integer -> Maybe Integer
-numValue (Pure f) = case f ([Pure realAdd, Impure 0], Map.empty) of (Impure res:stack, symtab) -> Just res
-                                                                    _ -> Nothing
-                                                                    where realAdd (Impure x:stack, symtab) = (Impure (x + 1):stack, symtab)
-                                                                          realAdd x = x
-numValue (Impure r) = Just r
-numValue (Error _) = Nothing
-
-printStack :: [StackFunction a] -> IO ()
-printStack stack = foldl combine (putStr "[") stack >> putStrLn "]" where
-    combine left right = left >>= \_ -> putStr (show right) >>= \_ -> putStr ", "
+numValue :: StackFunction Integer -> Context Integer -> Maybe Integer
+numValue (Pure f) c = case f $ first ([Pure realAdd, Impure 0] ++) c  of (Impure res:stack, symtab) -> Just res
+                                                                         _ -> Nothing
+                                                                         where realAdd (Impure x:stack, symtab) = (Impure (x + 1):stack, symtab)
+                                                                               realAdd x = x
+numValue (Impure r) c = Just r
 
 -- Basic Operations
 stackCall :: StackFunction a
