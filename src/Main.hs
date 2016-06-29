@@ -18,7 +18,7 @@ defaultContext = ([],
                               ("compose", stackCompose),
                               ("drop", stackDrop),
                               ("swap", stackSwap),
-                              ("plus", churchAdd)
+                              ("+", churchAdd)
                               ])
 
 main :: IO ()
