@@ -8,30 +8,14 @@ import Control.Monad.State
 
 import Text.Parsec.Prim
 
-import Reliquary.Parser
-import Reliquary.Evaluate
+import qualified Reliquary.Parser as Rel
+import qualified Reliquary.AST as Rel
+import qualified Reliquary.Evaluate as Rel
 
-defaultSymTab :: SymbolTable a
-defaultSymTab = Map.fromList [
-                             ("call", stackCall),
-                             ("compose", stackCompose),
-                             ("drop", stackDrop),
-                             ("swap", stackSwap),
-                             ("succ", churchSucc),
-                             ("+", churchAdd)
-                             ]
+import qualified SystemF.AST as SF
+import qualified SystemF.Type as SF
+import qualified SystemF.TypeCheck as SF
+import qualified SystemF.Evaluate as SF
 
 main :: IO ()
-main = do
-        [f] <- getArgs
-        s <- readFile f
-        let prog = runParser parseProgram () f s in
-            case prog of
-                Left err -> print err
-                Right definitions -> let symtab = compileProgram defaultSymTab definitions
-                                         f = Map.lookup "main" symtab in
-                                             case f of
-                                                 Just f -> case numValue $ head $ call f [] of
-                                                               Just n -> print n
-                                                               Nothing -> print "Error"
-                                                 Nothing -> print "error"
+main = undefined

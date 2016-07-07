@@ -13,5 +13,5 @@ data Term = TermTrue
           | TermApply Term Term
           | TermLambda String Type Term
           | TermTypeApply Term Type
-          | TermTypeLambda String Term
+          | TermTypeLambda String Kind Term
           deriving Show

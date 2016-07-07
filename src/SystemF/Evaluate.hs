@@ -17,5 +17,5 @@ translate (TermVar n) = L.TermVar n
 translate (TermApply f t) = L.TermApply (translate f)
                                         (translate t)
 translate (TermLambda n ntype t) = L.TermLambda n $ translate t
-translate (TermTypeApp t ttype) = translate t
-translate (TermTypeAbs n t) = translate t
+translate (TermTypeApply t ttype) = translate t
+translate (TermTypeLambda n nkind t) = translate t
