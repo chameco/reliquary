@@ -16,13 +16,10 @@ library
                        Reliquary.AST,
                        Reliquary.Evaluate,
 
-                       Lambda.AST,
-                       Lambda.Evaluate,
-
-                       SystemF.AST,
-                       SystemF.Evaluate,
-                       SystemF.Type,
-                       SystemF.TypeCheck
+                       Reliquary.Core.AST,
+                       Reliquary.Core.DeBruijn,
+                       Reliquary.Core.Evaluate,
+                       Reliquary.Core.TypeCheck
   
   build-depends:       base,
                        containers,
