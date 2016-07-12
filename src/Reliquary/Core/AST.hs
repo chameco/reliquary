@@ -9,10 +9,10 @@ data Term = TermStar
           | TermPi Term Term
           deriving (Show, Eq)
 
-type Env = [Term]
+type Env = [(Term, Int)]
 
 data TypeError = Mismatch Term Term
                | NotInScope
                | NotFunction Term
-               | NotKindStar Term Term
+               | NotType Term 
                deriving Show

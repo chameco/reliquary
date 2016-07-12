@@ -14,5 +14,5 @@ subst :: Int -> Term -> Term -> Term
 subst _ _ TermStar = TermStar
 subst n new old@(TermVar i) = if i == n then new else old
 subst n new (TermApply f t) = TermApply (subst n new f) (subst n new t)
-subst n new (TermLambda tt t) = TermLambda (subst (n + 1) (shift 1 new) tt) (subst (n + 1) (shift 1 new) t)
-subst n new (TermPi tt t) = TermPi (subst (n + 1) (shift 1 new) tt) (subst (n + 1) (shift 1 new) t)
+subst n new (TermLambda tt t) = TermLambda (subst n new tt) (subst (n + 1) (shift 1 new) t)
+subst n new (TermPi tt t) = TermPi (subst n new tt) (subst (n + 1) (shift 1 new) t)
