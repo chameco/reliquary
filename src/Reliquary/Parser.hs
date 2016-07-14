@@ -9,23 +9,28 @@ import Control.Applicative ((<$>), (*>), (<*), (<*>))
 
 import Reliquary.AST
 
-parseProgram :: Parser [Definition]
+parseProgram :: Parser [(String, Term)]
 parseProgram = many (parseDefinition <* spaces)
 
-parseDefinition :: Parser Definition
+parseDefinition :: Parser (String, Term)
 parseDefinition =
         char '@' *>
         (extractWord <$> (spaces *> parseWord <* spaces)) <*>
-        (Quasi <$> (spaces *> many (parseExpr <* spaces) <* spaces))
+        (spaces *> parseCompose <* spaces)
         <* char ';' where
-            extractWord (Word w) = Definition w
-            extractWord _ = undefined
+            extractWord (Word w) t = (w, t)
+            extractWord _ _ = undefined
+
+parseCompose :: Parser Term
+parseCompose = buildCompose . reverse <$> many (spaces *> parseExpr <* spaces) where
+    buildCompose (x:y:xs) = Compose x $ buildCompose $ y:xs
+    buildCompose (x:xs) = x
+    buildCompose [] = undefined
 
 parseExpr :: Parser Term
 parseExpr = parseWord <|>
             parseLiteral <|>
-            char '[' *> parseBlock <* char ']' <|>
-            char '{' *> parseQuasi <* char '}'
+            parseBlock
 
 parseWord :: Parser Term
 parseWord = Word <$>
@@ -36,9 +41,6 @@ parseLiteral :: Parser Term
 parseLiteral = Literal . read <$> many1 digit
 
 parseBlock :: Parser Term
-parseBlock = Block <$> many (parseExpr <* spaces) 
-
-parseQuasi :: Parser Term
-parseQuasi = extractBlock <$> parseBlock where
-    extractBlock (Block exprs) = Quasi exprs
-    extractBlock _ = undefined
+parseBlock = Block <$> (char '[' *> spaces *>
+                              parseExpr
+                        <* spaces <* char ']')

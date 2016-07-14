@@ -15,11 +15,15 @@ library
   exposed-modules:     Reliquary.Parser,
                        Reliquary.AST,
                        Reliquary.Evaluate,
+                       Reliquary.Utils,
 
                        Reliquary.Core.AST,
                        Reliquary.Core.DeBruijn,
                        Reliquary.Core.Evaluate,
-                       Reliquary.Core.TypeCheck
+                       Reliquary.Core.TypeCheck,
+                       Reliquary.Core.Sugar,
+                       Reliquary.Core.Scope,
+                       Reliquary.Core.Prim
   
   build-depends:       base,
                        containers,

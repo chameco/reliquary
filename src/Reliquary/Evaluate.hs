@@ -2,13 +2,11 @@ module Reliquary.Evaluate where
 
 import Data.Maybe (fromMaybe)
 
+import Reliquary.Core.AST
 import Reliquary.AST
 
-import qualified Reliquary.Core.AST as SF
-
---translate :: Term -> SF.Term
---translate (Word s) = SF.TermVar s
---translate (Literal n) = SF.TermLambda "##stack" SF.TypeNat $ foldr succ (SF.TermVar "##stack") [1..n] where
-    --succ _ = SF.TermSucc
---translate (Block exprs) = SF.TermLambda "##stack" SF.TypeNat $ translate $ Quasi exprs
---translate (Quasi exprs) = foldr (SF.TermApply . translate) SF.TermZero $ reverse exprs
+translate :: Term -> Maybe CoreTerm
+translate (Word s) = undefined
+translate (Literal n) = Just CStar
+translate (Block t) = Just CStar
+translate (Compose f g) = undefined

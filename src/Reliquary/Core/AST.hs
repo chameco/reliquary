@@ -2,17 +2,17 @@ module Reliquary.Core.AST where
 
 data Name = Integer
 
-data Term = TermStar
-          | TermVar Int
-          | TermApply Term Term
-          | TermLambda Term Term
-          | TermPi Term Term
-          deriving (Show, Eq)
+data CoreTerm = CStar
+              | CVar Int
+              | CApply CoreTerm CoreTerm
+              | CLambda CoreTerm CoreTerm
+              | CPi CoreTerm CoreTerm
+              deriving (Show, Eq)
 
-type Env = [(Term, Int)]
+type CoreEnv = [(CoreTerm, Int)]
 
-data TypeError = Mismatch Term Term
+data CoreError = Mismatch CoreTerm CoreTerm
                | NotInScope
-               | NotFunction Term
-               | NotType Term 
+               | NotFunction CoreTerm
+               | NotType CoreTerm 
                deriving Show
