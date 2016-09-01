@@ -1,7 +1,6 @@
 module Reliquary.AST where
 
 data Term = Word String
-          | Literal Integer
-          | Block Term
-          | Compose Term Term
+          | Literal Int
+          | Block [Term]
           deriving Show

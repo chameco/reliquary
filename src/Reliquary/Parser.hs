@@ -8,27 +8,22 @@ import Text.Parsec.Prim
 import Control.Applicative ((<$>), (*>), (<*), (<*>))
 
 import Reliquary.AST
+import Reliquary.Dictionary
 
-parseProgram :: Parser [(String, Term)]
+parseProgram :: Parser Dictionary
 parseProgram = many (parseDefinition <* spaces)
 
-parseDefinition :: Parser (String, Term)
+parseDefinition :: Parser Entry
 parseDefinition =
         char '@' *>
-        (extractWord <$> (spaces *> parseWord <* spaces)) <*>
-        (spaces *> parseCompose <* spaces)
-        <* char ';' where
-            extractWord (Word w) t = (w, t)
-            extractWord _ _ = undefined
+        (extractWord <$> (spaces *> parseWord <* spaces))
+        <*> (char ':' *> char ':' *> spaces *> parseTerm <* spaces)
+        <*> (char '=' *> spaces *> parseTerm <* spaces <* char ';') where
+            extractWord (Word w) = Entry w
+            extractWord _ = undefined
 
-parseCompose :: Parser Term
-parseCompose = buildCompose . reverse <$> many (spaces *> parseExpr <* spaces) where
-    buildCompose (x:y:xs) = Compose x $ buildCompose $ y:xs
-    buildCompose (x:xs) = x
-    buildCompose [] = undefined
-
-parseExpr :: Parser Term
-parseExpr = parseWord <|>
+parseTerm :: Parser Term
+parseTerm = parseWord <|>
             parseLiteral <|>
             parseBlock
 
@@ -41,6 +36,4 @@ parseLiteral :: Parser Term
 parseLiteral = Literal . read <$> many1 digit
 
 parseBlock :: Parser Term
-parseBlock = Block <$> (char '[' *> spaces *>
-                              parseExpr
-                        <* spaces <* char ']')
+parseBlock = Block <$> (char '[' *> many (spaces *> parseTerm <* spaces) <* char ']')
