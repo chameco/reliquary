@@ -17,17 +17,12 @@ library
                  , Reliquary.Core.Evaluate
                  , Reliquary.Core.TypeCheck
 
-                 , Reliquary.Sugar.AST
-                 , Reliquary.Sugar.Evaluate
-                 , Reliquary.Sugar.TypeCheck
-                 , Reliquary.Sugar.Scope
-                 , Reliquary.Sugar.Prelude
+                 , Reliquary.Utils.Monad
 
                  , Reliquary.Parser
                  , Reliquary.AST
                  , Reliquary.Evaluate
                  , Reliquary.Dictionary
-                 , Reliquary.Utils
   
   build-depends: base
                , containers
@@ -43,9 +38,6 @@ executable reliquary
   
   build-depends: base
                , reliquary
-               , containers
-               , parsec
-               , mtl
 
   default-language: Haskell2010
   ghc-options: -fwarn-incomplete-patterns

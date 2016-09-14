@@ -8,24 +8,23 @@ import Text.Parsec.Prim
 import Control.Applicative ((<$>), (*>), (<*), (<*>))
 
 import Reliquary.AST
-import Reliquary.Dictionary
 
-parseProgram :: Parser Dictionary
-parseProgram = many (parseDefinition <* spaces)
+parseTerm :: Parser Term
+parseTerm = parseDefinition
+        <|> parseWord
+        <|> parseLiteral
+        <|> parseBlock
+        <|> parseListType
 
-parseDefinition :: Parser Entry
+parseDefinition :: Parser Term
 parseDefinition =
         char '@' *>
         (extractWord <$> (spaces *> parseWord <* spaces))
-        <*> (char ':' *> char ':' *> spaces *> parseTerm <* spaces)
-        <*> (char '=' *> spaces *> parseTerm <* spaces <* char ';') where
-            extractWord (Word w) = Entry w
+        <*> (char ':' *> spaces *> parseTerm <* spaces)
+        <*> (char '=' *> spaces *> parseTerm <* spaces)
+        <*> (char ';' *> spaces *> parseTerm <* spaces) where
+            extractWord (Word w) = Definition w
             extractWord _ = undefined
-
-parseTerm :: Parser Term
-parseTerm = parseWord <|>
-            parseLiteral <|>
-            parseBlock
 
 parseWord :: Parser Term
 parseWord = Word <$>
@@ -36,4 +35,7 @@ parseLiteral :: Parser Term
 parseLiteral = Literal . read <$> many1 digit
 
 parseBlock :: Parser Term
-parseBlock = Block <$> (char '[' *> many (spaces *> parseTerm <* spaces) <* char ']')
+parseBlock = Block <$> (char '{' *> many (spaces *> parseTerm <* spaces) <* char '}')
+
+parseListType :: Parser Term
+parseListType = ListType <$> (char '[' *> many (spaces *> parseTerm <* spaces) <* char ']')
