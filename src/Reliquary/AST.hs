@@ -1,10 +1,6 @@
 module Reliquary.AST where
 
-data Term = Star
-          | UnitType
-          | Unit
-          | Definition String Term Term Term
-          | Word String
+data Term = Word String
           | Literal Int
           | Block [Term]
           | ListType [Term]

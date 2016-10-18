@@ -3,12 +3,11 @@ module Reliquary.Core.TypeCheck where
 import Control.Monad.Except
 
 import Reliquary.Utils.Monad
+import Reliquary.Utils.Error
 
 import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
 import Reliquary.Core.Evaluate
-
-import Debug.Trace
 
 envLookup :: Int -> CoreEnv -> Maybe (CoreTerm, Int)
 envLookup n env = if n >= l then Nothing else Just $ env !! n where
@@ -18,14 +17,13 @@ checkType :: CoreEnv -> CoreTerm -> Compiler CoreTerm
 checkType env CStar = return CStar
 checkType env CUnitType = return CStar
 checkType env (CVar n) = case envLookup n env of
-                            Just (t, d) -> return $ shift (length env - d) t
+                            Just (t, d) -> return $ shift (length env - d - 1) t
                             Nothing -> throwError NotInScope
 checkType env (CApply e e') = do
         te <- checkType env e
         te' <- checkType env e'
-        case te of CPi t t' -> if te' /= t
-                       then throwError $ Mismatch t te'
-                       else return $ subst 0 e' t'
+        case te of CPi t t' -> if te' /= t then throwError $ Mismatch t te'
+                                         else return $ subst 0 e' t'
                    _ -> throwError $ NotFunction te
 checkType env (CLambda p p') = do
         tp <- checkType env p
@@ -33,7 +31,7 @@ checkType env (CLambda p p') = do
             then do
                 tp' <- checkType ((p, length env):env) p'
                 return $ CPi p tp'
-            else throwError $ NotType tp
+            else throwError $ NotType p
 checkType env (CCons p p') = CSigma <$> checkType env p <*> checkType env p'
 checkType env CUnit = return CUnitType
 checkType env (CFst p) = do
@@ -52,8 +50,8 @@ checkType env (CPi p p') = do
                 tp' <- checkType ((normalized, length env):env) p'
                 if tp' == CStar
                     then return CStar
-                    else throwError $ NotType tp'
-            else throwError $ NotType tp
+                    else throwError $ NotType p'
+            else throwError $ NotType p
 checkType env (CSigma p p') = do
         tp <- checkType env p
         if tp == CStar
@@ -61,5 +59,5 @@ checkType env (CSigma p p') = do
                 tp' <- checkType env p'
                 if tp' == CStar
                     then return CStar
-                    else throwError $ NotType tp'
-            else throwError $ NotType tp
+                    else throwError $ NotType p'
+            else throwError $ NotType p
