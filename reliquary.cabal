@@ -2,7 +2,7 @@ name: reliquary
 version: 0.1.0.0
 synopsis: Concatenative language with macros and dependent types
 description: Concatenative language with macros and dependent types
-license: MIT
+license: GPLv3.0
 license-file: LICENSE
 author: Samuel Breese
 maintainer: samuel@chame.co
