@@ -17,7 +17,6 @@ library
                  , Reliquary.Core.Evaluate
                  , Reliquary.Core.TypeCheck
 
-                 , Reliquary.Utils.Monad
                  , Reliquary.Utils.Error
 
                  , Reliquary.Parser

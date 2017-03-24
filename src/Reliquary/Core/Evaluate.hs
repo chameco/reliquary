@@ -2,15 +2,13 @@ module Reliquary.Core.Evaluate where
 
 import Data.Maybe
 
-import Reliquary.Utils.Monad
-
 import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
 
-normalize :: CoreTerm -> Compiler CoreTerm
+normalize :: CoreTerm -> CoreTerm
 normalize t = rec $ normalize1 t where
     rec (Just t') = normalize t'
-    rec Nothing = return t
+    rec Nothing = t
 
     both :: (a -> a -> a) -> (a -> Maybe a) -> a -> a -> Maybe a
     both f g x y = go (g x) (g y) where

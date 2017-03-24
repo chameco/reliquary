@@ -8,13 +8,12 @@ import Text.Parsec.Prim
 import Control.Applicative ((<$>), (*>), (<*), (<*>))
 import Control.Monad.Except
 
-import Reliquary.Utils.Monad
 import Reliquary.Utils.Error
 
 import Reliquary.AST
 import Reliquary.Dictionary
 
-parseRepl :: String -> Compiler Term
+parseRepl :: String -> Either GenError Term
 parseRepl s = case parse (Block <$> many (spaces *> parseTerm <* spaces)) "<stdin>" s of Left e -> throwError $ SyntaxError e
                                                                                          Right t -> return t
 
@@ -32,7 +31,6 @@ parseTerm :: Parser Term
 parseTerm = parseWord
         <|> parseLiteral
         <|> parseBlock
-        <|> parseListType
 
 parseWord :: Parser Term
 parseWord = Word <$>
@@ -44,6 +42,3 @@ parseLiteral = Literal . read <$> many1 digit
 
 parseBlock :: Parser Term
 parseBlock = Block <$> (char '{' *> many (spaces *> parseTerm <* spaces) <* char '}')
-
-parseListType :: Parser Term
-parseListType = ListType <$> (char '[' *> many (spaces *> parseTerm <* spaces) <* char ']')

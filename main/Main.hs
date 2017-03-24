@@ -6,9 +6,6 @@ import System.Console.Haskeline
 
 import Control.Monad.Except
 
-import Rainbow
-
-import Reliquary.Utils.Monad
 import Reliquary.Utils.Error
 
 import Reliquary.Core.AST
@@ -26,22 +23,5 @@ defaultDict = [Entry "*" (CLambda CUnitType (CCons CStar CUnit)) (CPi CUnitType 
               ,Entry "pass" (CLambda CUnitType CUnit) (CPi CUnitType CUnitType)
               ]
 
-repl :: String -> IO ()
-repl line = do
-        result <- runExceptT $ runCompiler (processRepl line >>= \(t, ty) -> liftIO (putStrLn (displayTerm t ++ " : " ++ displayTerm ty)))
-        case result of Left e -> putStrLn ("!!! " ++ displayError e)
-                       _ -> return ()
-    where
-        processRepl line = do
-            ct <- parseRepl line >>= translateWith defaultDict
-            let wrapped = CApply ct CUnit in do
-                cty <- checkType [] wrapped
-                result <- normalize wrapped
-                return (result, cty)
-
 main :: IO ()
-main = runInputT defaultSettings loop where
-    loop = do
-        input <- getInputLine "rlq> "
-        case input of Nothing -> outputStrLn "Goodbye."
-                      Just input -> liftIO (repl input) >> loop
+main = undefined

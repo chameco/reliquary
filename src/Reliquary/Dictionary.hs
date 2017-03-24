@@ -1,7 +1,5 @@
 module Reliquary.Dictionary where
 
-import Reliquary.Utils.Monad
-
 import Reliquary.Core.AST
 
 import Reliquary.AST
