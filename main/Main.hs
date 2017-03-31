@@ -23,5 +23,20 @@ defaultDict = [Entry "*" (CLambda CUnitType (CCons CStar CUnit)) (CPi CUnitType 
               ,Entry "pass" (CLambda CUnitType CUnit) (CPi CUnitType CUnitType)
               ]
 
+repl :: String -> IO ()
+repl line = case processRepl line >>= \(t, ty) -> return $ displayTerm t ++ " : " ++ displayTerm ty of
+                Left e -> putStrLn ("!!! " ++ displayError e)
+                Right e -> putStrLn e
+    where
+        processRepl line = do
+           t <- normalize <$> (parseRepl line >>= translate1 defaultDict)
+           ty <- check [] t
+           return (t, ty)
+
+
 main :: IO ()
-main = undefined
+main = runInputT defaultSettings loop where
+    loop = do
+        input <- getInputLine "rlq> "
+        case input of Nothing -> outputStrLn "Goodbye."
+                      Just i -> liftIO (repl i) >> loop

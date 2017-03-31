@@ -14,18 +14,8 @@ import Reliquary.AST
 import Reliquary.Dictionary
 
 parseRepl :: String -> Either GenError Term
-parseRepl s = case parse (Block <$> many (spaces *> parseTerm <* spaces)) "<stdin>" s of Left e -> throwError $ SyntaxError e
-                                                                                         Right t -> return t
-
-parseDict :: Parser SourceDictionary
-parseDict = many (spaces *> parseEntry <* spaces)
-
-parseEntry :: Parser SourceEntry
-parseEntry =
-        char '@' *> (extractWord <$> (spaces *> parseWord <* spaces))
-        <*> (char '=' *> spaces *> parseTerm <* spaces) where
-            extractWord (Word w) = SourceEntry w
-            extractWord _ = undefined
+parseRepl s = case parse parseTerm "<stdin>" s of Left e -> throwError $ SyntaxError e
+                                                  Right t -> return t
 
 parseTerm :: Parser Term
 parseTerm = parseWord
@@ -41,4 +31,4 @@ parseLiteral :: Parser Term
 parseLiteral = Literal . read <$> many1 digit
 
 parseBlock :: Parser Term
-parseBlock = Block <$> (char '{' *> many (spaces *> parseTerm <* spaces) <* char '}')
+parseBlock = Block <$> (char '[' *> many (spaces *> parseTerm <* spaces) <* char ']')

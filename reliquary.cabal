@@ -2,7 +2,6 @@ name: reliquary
 version: 0.1.0.0
 synopsis: Concatenative language with macros and dependent types
 description: Concatenative language with macros and dependent types
-license: GPLv3.0
 license-file: LICENSE
 author: Samuel Breese
 maintainer: samuel@chame.co
@@ -16,6 +15,7 @@ library
                  , Reliquary.Core.DeBruijn
                  , Reliquary.Core.Evaluate
                  , Reliquary.Core.TypeCheck
+                 , Reliquary.Core.Utils
 
                  , Reliquary.Utils.Error
 

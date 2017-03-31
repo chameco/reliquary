@@ -10,7 +10,6 @@ data SourceEntry = SourceEntry String Term
 type SourceDictionary = [SourceEntry]
 
 data Entry = Entry { entryName :: String, entryTerm :: CoreTerm, entryType :: CoreTerm }
-           deriving Show
 
 type Dictionary = [Entry]
 

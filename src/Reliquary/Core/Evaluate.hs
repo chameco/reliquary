@@ -6,7 +6,7 @@ import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
 
 normalize :: CoreTerm -> CoreTerm
-normalize t = rec $ normalize1 t where
+normalize t = rec $ go t where
     rec (Just t') = normalize t'
     rec Nothing = t
 
@@ -17,14 +17,15 @@ normalize t = rec $ normalize1 t where
         go (Just a) Nothing = Just $ f a y
         go Nothing Nothing = Nothing
 
-    normalize1 :: CoreTerm -> Maybe CoreTerm
-    normalize1 (CApply (CLambda ntype body) t) = Just $ shift (-1) $ subst 0 t body
-    normalize1 (CApply f t) = CApply <$> normalize1 f <*> pure t
-    normalize1 (CFst (CCons t _)) = Just t
-    normalize1 (CSnd (CCons _ t)) = Just t
-    normalize1 (CFst p) = normalize1 p >>= Just . CFst
-    normalize1 (CSnd p) = normalize1 p >>= Just . CSnd
-    normalize1 (CCons p p') = both CCons normalize1 p p' 
-    normalize1 (CPi p p') = both CPi normalize1 p p'
-    normalize1 (CSigma p p') = both CSigma normalize1 p p'
-    normalize1 _ = Nothing
+    go :: CoreTerm -> Maybe CoreTerm
+    go (CApply (CLambda ntype body) t) = Just $ shift (-1) $ subst 0 t body
+    go (CApply (CUnsafe i _ f) t)  = Just $ f t
+    go (CApply f t) = CApply <$> go f <*> pure t
+    go (CFst (CCons t _)) = Just t
+    go (CSnd (CCons _ t)) = Just t
+    go (CFst p) = go p >>= Just . CFst
+    go (CSnd p) = go p >>= Just . CSnd
+    go (CCons p p') = both CCons go p p' 
+    go (CPi p p') = both CPi go p p'
+    go (CSigma p p') = both CSigma go p p'
+    go _ = Nothing
