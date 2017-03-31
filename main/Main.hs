@@ -17,10 +17,10 @@ import Reliquary.Evaluate
 import Reliquary.Dictionary
 
 defaultDict :: Dictionary
-defaultDict = [ Entry "*" (CLambda CUnitType (CCons CStar CUnit)) ([], [CStar])
-              , Entry "()" (CLambda CUnitType (CCons CUnit CUnit)) ([], [CStar])
-              , Entry "popStar" (CLambda (CSigma CStar CUnitType) CUnit) ([CStar], [])
-              , Entry "pass" (CLambda CUnitType CUnit) ([], [])
+defaultDict = [ ("*",       (CLambda CUnitType (CCons CStar CUnit), ([], [CStar])))
+              , ("()",      (CLambda CUnitType (CCons CUnit CUnit), ([], [CUnitType])))
+              , ("popStar", (CLambda (CSigma CStar CUnitType) CUnit, ([CStar], [])))
+              , ("pass",    (CLambda CUnitType CUnit, ([], [])))
               ]
 
 repl :: String -> IO ()
@@ -29,10 +29,9 @@ repl line = case processRepl line >>= \(t, ty) -> return $ displayTerm t ++ " : 
                 Right e -> putStrLn e
     where
         processRepl line = do
-           t <- normalize <$> (parseRepl line >>= translate1 defaultDict)
+           t <- normalize <$> (parseRepl line >>= translate defaultDict)
            ty <- check [] t
            return (t, ty)
-
 
 main :: IO ()
 main = runInputT defaultSettings loop where
