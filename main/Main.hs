@@ -17,10 +17,10 @@ import Reliquary.Evaluate
 import Reliquary.Dictionary
 
 defaultDict :: Dictionary
-defaultDict = [Entry "*" (CLambda CUnitType (CCons CStar CUnit)) (CPi CUnitType (CSigma CStar CUnitType))
-              ,Entry "()" (CLambda CUnitType (CCons CUnit CUnit)) (CPi CUnitType (CSigma CUnitType CUnitType))
-              ,Entry "popStar" (CLambda (CSigma CStar CUnitType) CUnit) (CPi (CSigma CStar CUnitType) CUnitType)
-              ,Entry "pass" (CLambda CUnitType CUnit) (CPi CUnitType CUnitType)
+defaultDict = [ Entry "*" (CLambda CUnitType (CCons CStar CUnit)) ([], [CStar])
+              , Entry "()" (CLambda CUnitType (CCons CUnit CUnit)) ([], [CStar])
+              , Entry "popStar" (CLambda (CSigma CStar CUnitType) CUnit) ([CStar], [])
+              , Entry "pass" (CLambda CUnitType CUnit) ([], [])
               ]
 
 repl :: String -> IO ()

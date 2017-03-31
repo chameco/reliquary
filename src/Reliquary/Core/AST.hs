@@ -25,22 +25,22 @@ isType :: CoreTerm -> Bool
 isType CStar = True
 isType _ = False
 
-matchType :: CoreTerm -> CoreTerm -> Bool
-matchType CStar CStar = True
-matchType CUnitType CUnitType = True
-matchType CUnit CUnit = True
-matchType CBlockType CBlockType = True
-matchType (CBlock ts) (CBlock ts') = ts == ts'
-matchType (CVar i) (CVar j) = i == j
-matchType (CApply f t) (CApply f' t') = matchType f f' && matchType t t'
-matchType (CLambda ty t) (CLambda ty' t') = matchType ty ty' && matchType t t'
-matchType CUnsafe{} CUnsafe{} = False
-matchType (CCons t1 t2) (CCons t1' t2') = matchType t1 t1' && matchType t2 t2'
-matchType (CFst t) (CFst t') = matchType t t'
-matchType (CSnd t) (CSnd t') = matchType t t'
-matchType (CPi ty t) (CPi ty' t') = matchType ty ty' && matchType t t'
-matchType (CSigma ty t) (CSigma ty' t') = matchType ty ty' && matchType t t'
-matchType _ _ = False
+matchTerm :: CoreTerm -> CoreTerm -> Bool
+matchTerm CStar CStar = True
+matchTerm CUnitType CUnitType = True
+matchTerm CUnit CUnit = True
+matchTerm CBlockType CBlockType = True
+matchTerm (CBlock ts) (CBlock ts') = ts == ts'
+matchTerm (CVar i) (CVar j) = i == j
+matchTerm (CApply f t) (CApply f' t') = matchTerm f f' && matchTerm t t'
+matchTerm (CLambda ty t) (CLambda ty' t') = matchTerm ty ty' && matchTerm t t'
+matchTerm CUnsafe{} CUnsafe{} = False
+matchTerm (CCons t1 t2) (CCons t1' t2') = matchTerm t1 t1' && matchTerm t2 t2'
+matchTerm (CFst t) (CFst t') = matchTerm t t'
+matchTerm (CSnd t) (CSnd t') = matchTerm t t'
+matchTerm (CPi ty t) (CPi ty' t') = matchTerm ty ty' && matchTerm t t'
+matchTerm (CSigma ty t) (CSigma ty' t') = matchTerm ty ty' && matchTerm t t'
+matchTerm _ _ = False
 
 displayTerm :: CoreTerm -> String
 displayTerm CStar = "*"

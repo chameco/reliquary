@@ -25,7 +25,7 @@ check env (CApply e e') = do
         te <- check env e
         te' <- check env e'
         case te of
-            CPi t t' -> if matchType te' t
+            CPi t t' -> if matchTerm te' t
                             then pure $ normalize $ subst 0 e' t'
                             else throwError $ Mismatch t te'
             _ -> throwError $ NotFunction te
@@ -53,8 +53,8 @@ check env (CPi p p') = do
                 tp' <- check ((normalize p, length env):env) p'
                 if isType tp'
                     then pure CStar
-                    else throwError $ NotType2 p' tp
-            else throwError $ NotType3 p (CPi p p')
+                    else throwError $ NotType p'
+            else throwError $ NotType p
 check env (CSigma p p') = do
         tp <- check env p
         if isType tp
