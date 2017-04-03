@@ -15,15 +15,15 @@ import Reliquary.Evaluate
 import Reliquary.Dictionary
 
 defaultDict :: Dictionary
-defaultDict = [ ("*",       (CLambda CUnitType (CCons CStar CUnit), ([], [CStar])))
-              , ("()",      (CLambda CUnitType (CCons CUnit CUnit), ([], [CUnitType])))
-              , ("popStar", (CLambda (CSigma CStar CUnitType) CUnit, ([CStar], [])))
-              , ("popUnit", (CLambda (CSigma CUnitType CUnitType) CUnit, ([CUnitType], [])))
-              , ("pass",    (CLambda CUnitType CUnit, ([], [])))
+defaultDict = [ ("*",       (CLambda CUnitType (CCons CStar CUnit), CPi CUnitType (CSigma CStar CUnitType)))
+              , ("()",      (CLambda CUnitType (CCons CUnit CUnit), CPi CUnitType (CSigma CUnitType CUnitType)))
+              , ("popStar", (CLambda (CSigma CStar CUnitType) CUnit, CPi (CSigma CStar CUnitType) CUnitType))
+              , ("popUnit", (CLambda (CSigma CUnitType CUnitType) CUnit, CPi (CSigma CUnitType CUnitType) CUnitType))
+              , ("pass",    (CLambda CUnitType CUnit, CPi CUnitType CUnitType))
               ]
 
 repl :: String -> IO ()
-repl line = case displayFunc . force <$> processRepl line of
+repl line = case displayTyped . force <$> processRepl line of
                 Left e -> putStrLn ("!!! " ++ displayError e)
                 Right e -> putStrLn e
     where processRepl line = parseRepl line >>= translateAll defaultDict
