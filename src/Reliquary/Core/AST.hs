@@ -9,8 +9,8 @@ data Name = Integer
 data CoreTerm = CStar
               | CUnitType
               | CUnit
-              | CBlockType
-              | CBlock [Term]
+              | CRelTermType 
+              | CRelTerm Term
               | CVar Int
               | CApply CoreTerm CoreTerm
               | CLambda CoreTerm CoreTerm
@@ -41,8 +41,8 @@ matchTerm :: CoreTerm -> CoreTerm -> Bool
 matchTerm CStar CStar = True
 matchTerm CUnitType CUnitType = True
 matchTerm CUnit CUnit = True
-matchTerm CBlockType CBlockType = True
-matchTerm (CBlock ts) (CBlock ts') = ts == ts'
+matchTerm CRelTermType CRelTermType = True
+matchTerm (CRelTerm t) (CRelTerm t') = t == t'
 matchTerm (CVar i) (CVar j) = i == j
 matchTerm (CApply f t) (CApply f' t') = matchTerm f f' && matchTerm t t'
 matchTerm (CLambda ty t) (CLambda ty' t') = matchTerm ty ty' && matchTerm t t'
@@ -57,8 +57,8 @@ displayTerm :: CoreTerm -> String
 displayTerm CStar = "*"
 displayTerm CUnitType = "Unit"
 displayTerm CUnit = "()"
-displayTerm CBlockType = "Block"
-displayTerm (CBlock ts) = show ts
+displayTerm CRelTermType = "RelTerm"
+displayTerm (CRelTerm t) = show t
 displayTerm (CVar i) = show i
 displayTerm (CApply f t) = "(" ++ displayTerm f ++ " " ++ displayTerm t ++ ")"
 displayTerm (CLambda ty t) = "λ" ++ displayTerm ty ++ "." ++ displayTerm t

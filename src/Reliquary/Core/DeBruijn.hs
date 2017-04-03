@@ -7,8 +7,8 @@ shift n = shiftInt 0 where
     shiftInt _ CStar = CStar
     shiftInt _ CUnitType = CUnitType
     shiftInt _ CUnit = CUnit
-    shiftInt _ CBlockType = CBlockType
-    shiftInt _ b@(CBlock _) = b
+    shiftInt _ CRelTermType = CRelTermType
+    shiftInt _ r@(CRelTerm _) = r
     shiftInt l (CVar n') = CVar $ if n' >= l then n + n' else n'
     shiftInt l (CApply f t) = CApply (shiftInt l f) (shiftInt l t)
     shiftInt l (CLambda tt t) = CLambda (shiftInt l tt) (shiftInt (l + 1) t)
@@ -22,8 +22,8 @@ subst :: Int -> CoreTerm -> CoreTerm -> CoreTerm
 subst _ _ CStar = CStar
 subst _ _ CUnitType = CUnitType
 subst _ _ CUnit = CUnit
-subst _ _ CBlockType = CBlockType
-subst _ _ b@(CBlock _) = b
+subst _ _ CRelTermType = CRelTermType
+subst _ _ r@(CRelTerm _) = r
 subst n new old@(CVar i) = if i == n then new else old
 subst n new (CApply f t) = CApply (subst n new f) (subst n new t)
 subst n new (CLambda tt t) = CLambda (subst n new tt) (subst (n + 1) (shift 1 new) t)

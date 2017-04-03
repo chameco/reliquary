@@ -6,8 +6,6 @@ import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
 import Reliquary.Core.Evaluate
 
-import Debug.Trace
-
 envLookup :: Int -> CoreEnv -> Maybe (CoreTerm, Int)
 envLookup n env = if n >= l then Nothing else Just $ env !! n where
     l = length env
@@ -16,8 +14,8 @@ check :: CoreEnv -> CoreTerm -> Either GenError CoreTerm
 check _ CStar = return CStar
 check _ CUnitType = return CStar
 check env CUnit = return CUnitType
-check _ CBlockType = return CStar
-check _ (CBlock _) = return CBlockType
+check _ CRelTermType = return CStar
+check _ (CRelTerm _) = return CRelTermType
 check env (CVar n) = case envLookup n env of
                             Just (t, d) -> return $ shift (length env - d - 1) t
                             Nothing -> throwError NotInScope
@@ -26,7 +24,7 @@ check env (CApply e e') = do
         te' <- check env e'
         case te of
             CPi t t' -> if matchTerm te' t
-                            then return $ normalize $ trace (displayTerm t') $ subst 0 e' t'
+                            then return $ normalize $ subst 0 e' t'
                             else throwError $ Mismatch t te'
             _ -> throwError $ NotFunction te
 check env (CLambda p p') = do

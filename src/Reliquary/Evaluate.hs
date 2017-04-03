@@ -16,7 +16,11 @@ import Debug.Trace
 
 translate :: Dictionary -> Term -> Either GenError Typed
 translate d (Word s) = fromMaybe (throwError $ NameNotInScope s) (return <$> dictLookup d s)
-translate d (Block terms) = return (CLambda CUnitType $ CBlock terms, CPi CUnitType CBlockType)
+translate d (Block terms) = return $ merge (CLambda CUnitType . flip CCons CUnit) (CPi CUnitType . flip CSigma CUnitType) $ go terms where
+    go [] = (CUnit, CUnitType)
+    go (t:ts) = merge (CCons $ CRelTerm t) (CSigma CRelTermType) $ go ts
+    merge :: (CoreTerm -> CoreTerm) -> (CoreTerm -> CoreTerm) -> Typed -> Typed
+    merge f f' (t, t') = (f t, f' t')
 
 translateAll :: Dictionary -> [Term] -> Either GenError Typed
 translateAll d terms = mapM (translate d) terms >>= composeAll
