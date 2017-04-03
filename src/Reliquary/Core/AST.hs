@@ -14,7 +14,6 @@ data CoreTerm = CStar
               | CVar Int
               | CApply CoreTerm CoreTerm
               | CLambda CoreTerm CoreTerm
-              | CUnsafe CoreTerm (CoreTerm -> Either GenError CoreTerm) (CoreTerm -> Either GenError CoreTerm)
               | CCons CoreTerm CoreTerm
               | CFst CoreTerm
               | CSnd CoreTerm
@@ -47,7 +46,6 @@ matchTerm (CBlock ts) (CBlock ts') = ts == ts'
 matchTerm (CVar i) (CVar j) = i == j
 matchTerm (CApply f t) (CApply f' t') = matchTerm f f' && matchTerm t t'
 matchTerm (CLambda ty t) (CLambda ty' t') = matchTerm ty ty' && matchTerm t t'
-matchTerm CUnsafe{} CUnsafe{} = False
 matchTerm (CCons t1 t2) (CCons t1' t2') = matchTerm t1 t1' && matchTerm t2 t2'
 matchTerm (CFst t) (CFst t') = matchTerm t t'
 matchTerm (CSnd t) (CSnd t') = matchTerm t t'
@@ -64,7 +62,6 @@ displayTerm (CBlock ts) = show ts
 displayTerm (CVar i) = show i
 displayTerm (CApply f t) = "(" ++ displayTerm f ++ " " ++ displayTerm t ++ ")"
 displayTerm (CLambda ty t) = "λ" ++ displayTerm ty ++ "." ++ displayTerm t
-displayTerm (CUnsafe i _ _) = "{Unsafe " ++ displayTerm i ++ "}"
 displayTerm (CCons t t') = "[" ++ displayTerm t ++ "," ++ displayTerm t' ++ "]"
 displayTerm (CFst t) = "fst " ++ displayTerm t
 displayTerm (CSnd t) = "snd " ++ displayTerm t

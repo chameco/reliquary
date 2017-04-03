@@ -36,7 +36,6 @@ check env (CLambda p p') = do
                 tp' <- check ((p, length env):env) p'
                 return $ CPi p tp'
             else throwError $ NotType p
-check env (CUnsafe i f _) = return $ CPi i (CApply (CUnsafe CStar return f) (CVar 0))
 check env (CCons p p') = CSigma <$> check env p <*> check env p'
 check env (CFst p) = do
         tp <- check env p

@@ -14,21 +14,12 @@ import Reliquary.Parser
 import Reliquary.Evaluate
 import Reliquary.Dictionary
 
-blockFunc :: CoreTerm -> Either GenError CoreTerm
-blockFunc (CCons (CBlock terms) CUnit) = fst <$> translateAll defaultDict terms
-blockFunc t = throwError $ InternalError $ CFst t
-
-blockType :: CoreTerm -> Either GenError CoreTerm
-blockType (CCons (CBlock terms) CUnit) = fst <$> translateAll defaultDict terms >>= check []
-blockType t = throwError $ InternalError $ CSnd t
-
 defaultDict :: Dictionary
 defaultDict = [ ("*",       (CLambda CUnitType (CCons CStar CUnit), ([], [CStar])))
               , ("()",      (CLambda CUnitType (CCons CUnit CUnit), ([], [CUnitType])))
               , ("popStar", (CLambda (CSigma CStar CUnitType) CUnit, ([CStar], [])))
               , ("popUnit", (CLambda (CSigma CUnitType CUnitType) CUnit, ([CUnitType], [])))
               , ("pass",    (CLambda CUnitType CUnit, ([], [])))
-              , ("@",       (CUnsafe (CSigma CBlockType CUnitType) blockType blockFunc, ([CBlockType], [CPi CUnitType (CApply (CUnsafe CBlockType undefined undefined) (CVar 0))])))
               ]
 
 repl :: String -> IO ()
