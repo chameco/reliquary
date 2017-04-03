@@ -8,14 +8,14 @@ import Text.Parsec.Prim
 import Control.Applicative ((*>), (<*), (<*>))
 import Control.Monad.Except
 
-import Reliquary.Utils.Error
+import Reliquary.Core.AST
 
 import Reliquary.AST
 import Reliquary.Dictionary
 
-parseRepl :: String -> Either GenError Term
-parseRepl s = case parse parseTerm "<stdin>" s of Left e -> throwError $ SyntaxError e
-                                                  Right t -> return t
+parseRepl :: String -> Either GenError [Term]
+parseRepl s = case parse (many (spaces *> parseTerm <* spaces)) "<stdin>" s of Left e -> throwError $ SyntaxError e
+                                                                               Right t -> return t
 
 parseDict :: Parser SourceDictionary
 parseDict = many (spaces *> parseEntry <* spaces)

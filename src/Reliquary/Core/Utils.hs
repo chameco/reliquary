@@ -2,8 +2,6 @@ module Reliquary.Core.Utils where
 
 import Control.Monad.Except
 
-import Reliquary.Utils.Error
-
 import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
 

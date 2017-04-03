@@ -1,5 +1,7 @@
 module Reliquary.Core.AST where
 
+import Text.Parsec
+
 import Reliquary.AST
 
 data Name = Integer
@@ -12,7 +14,7 @@ data CoreTerm = CStar
               | CVar Int
               | CApply CoreTerm CoreTerm
               | CLambda CoreTerm CoreTerm
-              | CUnsafe CoreTerm (CoreTerm -> CoreTerm) (CoreTerm -> CoreTerm)
+              | CUnsafe CoreTerm (CoreTerm -> Either GenError CoreTerm) (CoreTerm -> Either GenError CoreTerm)
               | CCons CoreTerm CoreTerm
               | CFst CoreTerm
               | CSnd CoreTerm
@@ -20,6 +22,17 @@ data CoreTerm = CStar
               | CSigma CoreTerm CoreTerm
 
 type CoreEnv = [(CoreTerm, Int)]
+
+data GenError = Mismatch CoreTerm CoreTerm
+              | NotInScope
+              | NotType CoreTerm 
+              | NotFunction CoreTerm
+              | NotPair CoreTerm 
+              | NameNotInScope String
+              | Redefinition String
+              | SyntaxError ParseError
+              | EmptyStack
+              | InternalError CoreTerm
 
 isType :: CoreTerm -> Bool
 isType CStar = True
@@ -57,3 +70,15 @@ displayTerm (CFst t) = "fst " ++ displayTerm t
 displayTerm (CSnd t) = "snd " ++ displayTerm t
 displayTerm (CPi ty t) = "Π" ++ displayTerm ty ++ "." ++ displayTerm t
 displayTerm (CSigma ty t) = "Σ" ++ displayTerm ty ++ "." ++ displayTerm t
+
+displayError :: GenError -> String
+displayError (Mismatch t t') = "Type mismatch: " ++ displayTerm t' ++ " is not expected type " ++ displayTerm t
+displayError NotInScope = "Type checker failure: de Bruijn index not in scope"
+displayError (NotType t) = displayTerm t ++ " is not a type"
+displayError (NotFunction t) = displayTerm t ++ " is not a function"
+displayError (NotPair t) = displayTerm t ++ " is not a pair"
+displayError (NameNotInScope n) = "Name " ++ n ++ " is not in scope"
+displayError (Redefinition n) = "Attempt to redefine name " ++ n
+displayError (SyntaxError parseError) = "Syntax error: " ++ show parseError
+displayError EmptyStack = "Empty stack"
+displayError (InternalError t) = "Internal error: " ++ displayTerm t

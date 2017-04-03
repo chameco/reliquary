@@ -19,8 +19,8 @@ normalize t = rec $ go t where
 
     go :: CoreTerm -> Maybe CoreTerm
     go (CApply (CLambda ntype body) t) = Just $ shift (-1) $ subst 0 t body
-    go (CApply (CUnsafe i _ f) t)  = Just $ f t
-    go (CApply f t) = CApply <$> go f <*> pure t
+    go (CApply (CUnsafe i _ f) t)  = case f t of Right t -> Just t; Left e -> error $ displayError e
+    go (CApply f t) = CApply <$> go f <*> return t
     go (CFst (CCons t _)) = Just t
     go (CSnd (CCons _ t)) = Just t
     go (CFst p) = go p >>= Just . CFst
