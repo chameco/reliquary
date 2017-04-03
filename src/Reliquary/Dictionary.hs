@@ -40,4 +40,4 @@ wrap input needed output t = wrapLambda input $ takeCons (length output) (CApply
 compose :: TypedFunction -> TypedFunction -> Either GenError TypedFunction
 compose (i, (it, ot)) (o, (it', ot')) = do
         (take, drop, miss) <- numBreak ot it'
-        pure (wrapLambda (it ++ miss) $ CApply (wrap ot it' ot' o) (CApply (wrap (it ++ miss) it ot i) (CVar 0)), (it ++ miss, ot' ++ drop))
+        pure (wrapLambda (it ++ miss) $ CApply (wrap (ot ++ miss) it' ot' o) (CApply (wrap (it ++ miss) it ot i) (CVar 0)), (it ++ miss, ot' ++ drop))
