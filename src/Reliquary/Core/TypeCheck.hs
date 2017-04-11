@@ -6,6 +6,8 @@ import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
 import Reliquary.Core.Evaluate
 
+import Debug.Trace
+
 envLookup :: Int -> CoreEnv -> Maybe (CoreTerm, Int)
 envLookup n env = if n >= l then Nothing else Just $ env !! n where
     l = length env
@@ -17,7 +19,7 @@ check env CUnit = return CUnitType
 check _ CRelTermType = return CStar
 check _ (CRelTerm _) = return CRelTermType
 check env (CVar n) = case envLookup n env of
-                            Just (t, d) -> return $ shift (length env - d - 1) t
+                            Just (t, d) -> return $ shift (length env - d) t
                             Nothing -> throwError NotInScope
 check env (CApply e e') = do
         te <- check env e
@@ -41,7 +43,7 @@ check env (CFst p) = do
                    _  -> throwError $ NotPair tp
 check env (CSnd p) = do
         tp <- check env p
-        case tp of CSigma t' t -> return t
+        case tp of CSigma _ t -> return $ normalize $ subst 0 (CFst p) t
                    _ -> throwError $ NotPair tp
 check env (CPi p p') = do
         tp <- check env p
@@ -59,5 +61,5 @@ check env (CSigma p p') = do
                 tp' <- check ((normalize p, length env):env) p'
                 if isType tp'
                     then return CStar
-                    else throwError $ NotType p'
+                    else throwError $ NotType tp'
             else throwError $ NotType p

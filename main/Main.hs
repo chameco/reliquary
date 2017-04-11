@@ -20,10 +20,11 @@ defaultDict = [ ("*",       (CLambda CUnitType (CCons CStar CUnit), CPi CUnitTyp
               , ("popStar", (CLambda (CSigma CStar CUnitType) CUnit, CPi (CSigma CStar CUnitType) CUnitType))
               , ("popUnit", (CLambda (CSigma CUnitType CUnitType) CUnit, CPi (CSigma CUnitType CUnitType) CUnitType))
               , ("pass",    (CLambda CUnitType CUnit, CPi CUnitType CUnitType))
+              , ("Pi",      (CLambda (CSigma CStar $ CSigma CStar CUnitType) $ CPi (CFst $ CVar 0) (CFst $ CSnd $ CVar 1), CPi (CSigma CStar $ CSigma CStar CUnitType) CStar))
               ]
 
 repl :: String -> IO ()
-repl line = case displayTyped . force <$> processRepl line of
+repl line = case displayTyped . eval CUnit <$> processRepl line of
                 Left e -> putStrLn ("!!! " ++ displayError e)
                 Right e -> putStrLn e
     where processRepl line = parseRepl line >>= translateAll defaultDict
