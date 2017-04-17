@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Monad.Except
 
 import Reliquary.Core.AST
+import Reliquary.Core.DeBruijn
 
 import Reliquary.AST
 
@@ -21,6 +22,9 @@ displayTyped (t, ty) = displayTerm t ++ " : " ++ displayTerm ty
 dictLookup :: Dictionary -> String -> Maybe Typed
 dictLookup (e:es) n = if fst e == n then Just $ snd e else dictLookup es n
 dictLookup [] _ = Nothing
+
+unsafeLookup :: Dictionary -> String -> CoreTerm
+unsafeLookup d n = case dictLookup d n of Nothing -> error "Internal error"; Just t -> snd t
 
 dictInsert :: Dictionary -> (String, Typed) -> Dictionary
 dictInsert = flip (:)
@@ -43,7 +47,7 @@ dropCons :: Int -> CoreTerm -> CoreTerm
 dropCons n t = iterate CSnd t !! n
 
 wrap :: CoreTerm -> CoreTerm -> CoreTerm -> CoreTerm -> CoreTerm
-wrap input needed output t = CLambda input $ takeCons (lengthSigma output) (CApply t (takeCons (lengthSigma needed) (CVar 0) CUnit)) (dropCons (lengthSigma needed) (CVar 0))
+wrap input needed output t = CLambda input $ shift 1 $ takeCons (lengthSigma output) (CApply t (takeCons (lengthSigma needed) (CVar (-1)) CUnit)) (dropCons (lengthSigma needed) (CVar (-1)))
 
 appendSigma :: CoreTerm -> CoreTerm -> Either GenError CoreTerm
 appendSigma CUnitType t' = return t'
@@ -60,10 +64,14 @@ compose (i, CPi it ot) (o, CPi it' ot') = do
         finalInput <- appendSigma it miss
         wrapInput <- appendSigma ot miss
         finalOutput <- appendSigma ot' drop
-        return (CLambda finalInput $ CApply (wrap wrapInput it' ot' o) (CApply (wrap finalInput it ot i) (CVar 0)), CPi finalInput finalOutput)
+        return (CLambda finalInput $ shift 1 $ CApply (wrap wrapInput it' ot' o) (CApply (wrap finalInput it ot i) (CVar (-1))), CPi finalInput finalOutput)
 compose _ _ = throwError $ InternalError CStar
 
 composeAll :: [Typed] -> Either GenError Typed
 composeAll [] = return (CLambda CUnitType CUnit, CPi CUnitType CUnitType)
 composeAll [t] = return t
 composeAll (t:ts) = composeAll ts >>= compose t
+
+dictWrap :: Dictionary -> CoreTerm -> CoreTerm
+dictWrap [] t' = t'
+dictWrap ((_, (t, ty)):ds) t' = CApply (CLambda ty (dictWrap ds t')) t

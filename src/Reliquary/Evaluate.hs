@@ -8,6 +8,7 @@ import Control.Monad.Except
 
 import Reliquary.Core.AST
 import Reliquary.Core.Evaluate
+import Reliquary.Core.TypeCheck
 
 import Reliquary.AST
 import Reliquary.Dictionary
@@ -20,6 +21,8 @@ translate1 d env (Word s) = case do i <- elemIndex s env
                                     Just (CVar i, ty)
                                 of Nothing -> throwError $ NameNotInScope s
                                    Just ret -> return ret
+-- translate1 d env (Word s) = case dictLookup d s of Nothing -> throwError $ NameNotInScope s
+--                                                   Just ret -> return ret
 translate1 _ _ (Block terms) = return $ merge (CLambda CUnitType . flip CCons CUnit) (CPi CUnitType . flip CSigma CUnitType) $ go terms where
     go [] = (CUnit, CUnitType)
     go (t:ts) = merge (CCons $ CRelTerm t) (CSigma CRelTermType) $ go ts
@@ -27,7 +30,8 @@ translate1 _ _ (Block terms) = return $ merge (CLambda CUnitType . flip CCons CU
     merge f f' (t, t') = (f t, f' t')
 
 translateAll :: Dictionary -> [Term] -> Either GenError Typed
-translateAll d terms = mapM (translate1 d []) terms >>= composeAll
+translateAll d terms = mapM (translate1 d env) terms >>= composeAll
+    where env = reverse $ fst <$> d
 
-eval :: CoreTerm -> Typed -> Typed
-eval base (t, ty) = (normalize $ CApply t base, ty)
+eval :: Dictionary -> CoreTerm -> Typed -> Either GenError Typed
+eval d base (t, ty) = let t' = normalize $ dictWrap d $ CApply t base in do ty' <- check [] t'; return (t', ty')
