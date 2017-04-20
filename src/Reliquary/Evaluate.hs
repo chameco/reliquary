@@ -21,8 +21,6 @@ translate1 d env (Word s) = case do i <- elemIndex s env
                                     Just (CVar i, ty)
                                 of Nothing -> throwError $ NameNotInScope s
                                    Just ret -> return ret
--- translate1 d env (Word s) = case dictLookup d s of Nothing -> throwError $ NameNotInScope s
---                                                   Just ret -> return ret
 translate1 _ _ (Block terms) = return $ merge (CLambda CUnitType . flip CCons CUnit) (CPi CUnitType . flip CSigma CUnitType) $ go terms where
     go [] = (CUnit, CUnitType)
     go (t:ts) = merge (CCons $ CRelTerm t) (CSigma CRelTermType) $ go ts
