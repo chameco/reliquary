@@ -28,8 +28,11 @@ translate1 _ _ (Block terms) = return $ merge (CLambda CUnitType . flip CCons CU
     merge f f' (t, t') = (f t, f' t')
 
 translateAll :: Dictionary -> [Term] -> Either GenError Typed
-translateAll d terms = mapM (translate1 d env) terms >>= composeAll
+translateAll d terms = mapM (translate1 d env) terms >>= composeAll d
     where env = reverse $ fst <$> d
 
 eval :: Dictionary -> CoreTerm -> Typed -> Either GenError Typed
-eval d base (t, ty) = let t' = normalize $ dictWrap d $ CApply t base in do ty' <- check [] t'; return (t', ty')
+eval d base (t, _) = do
+        let wrapped = dictWrap d $ CApply t base
+        ty <- check [] wrapped
+        return (normalize wrapped, ty)

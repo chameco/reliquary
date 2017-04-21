@@ -5,6 +5,7 @@ import Control.Monad.Except
 
 import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
+import Reliquary.Core.TypeCheck
 
 import Reliquary.AST
 
@@ -82,8 +83,8 @@ applyCons :: Int -> CoreTerm -> CoreTerm -> CoreTerm
 applyCons 0 term bot = CApply bot CUnit
 applyCons i term bot = applyCons (i - 1) (CSnd term) $ CApply bot $ CFst term
 
-compose :: Typed -> Typed -> Either GenError Typed
-compose (i, ic@(CPi it ot)) (o, oc@(CPi it' ot')) = do
+compose :: Dictionary -> Typed -> Typed -> Either GenError Typed
+compose d (i, ic@(CPi it ot)) (o, oc@(CPi it' ot')) = do
         let lenit = lengthSigma $ uncurryPi ic
             lenot = lengthSigma $ uncurryRest ic
             lenit' = lengthSigma $ uncurryPi oc
@@ -98,12 +99,14 @@ compose (i, ic@(CPi it ot)) (o, oc@(CPi it' ot')) = do
             oresult = applyCons lenit' ienriched o
             oenriched = takeCons lenot' oresult $ dropCons lenit' ienriched
 
+        check [] $ dictWrap d oresult 
         return (curryLambda finalInput $ shift 1 oenriched, curryPi finalInput finalOutput)
-compose (i, _) (_, CPi{}) = throwError $ NotFunction i
-compose (_, _) (o, _) = throwError $ NotFunction o
 
-composeAll :: [Typed] -> Either GenError Typed
-composeAll = foldM compose (CLambda CUnitType CUnit, CPi CUnitType CUnitType)
+compose _ (i, _) (_, CPi{}) = throwError $ NotFunction i
+compose _ (_, _) (o, _) = throwError $ NotFunction o
+
+composeAll :: Dictionary -> [Typed] -> Either GenError Typed
+composeAll d = foldM (compose d) (CLambda CUnitType CUnit, CPi CUnitType CUnitType)
 
 dictWrap :: Dictionary -> CoreTerm -> CoreTerm
 dictWrap [] t' = t'

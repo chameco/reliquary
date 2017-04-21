@@ -25,7 +25,7 @@ check env (CApply e e') = do
         te <- check env e
         te' <- check env e'
         case te of
-            CPi t t' -> if matchTerm te' t
+            CPi t t' -> if matchTerm te' t -- $ subst 0 e' t
                             then return $ normalize $ subst 0 e' t'
                             else throwError $ Mismatch t te'
             _ -> throwError $ NotFunction te

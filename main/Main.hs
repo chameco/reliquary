@@ -27,14 +27,11 @@ defaultDict :: Dictionary
 defaultDict = [ ("*",       (CLambda CUnitType $ CCons CStar CUnit, CPi CUnitType $ CSigma CStar CUnitType))
               , ("**",      (CLambda CUnitType $ CCons CStar $ CCons CStar CUnit, CPi CUnitType $ CSigma CStar $ CSigma CStar CUnitType))
               , ("popStar", (CLambda CStar $ CLambda CUnitType CUnit, CPi CStar $ CPi CUnitType CUnitType))
-              , ("pushT",   (CLambda CUnit $ CCons (CLambda CStar CStar) CUnit, CPi CUnitType $ CSigma (CPi CStar CStar) CUnitType))
-              , ("popT",    (CLambda (CPi CStar CStar) $ CLambda CUnitType $ CSnd $ CVar 1, CPi (CPi CStar CStar) $ CPi CUnitType CUnitType))
+              , ("pushT",   (CLambda CUnitType $ CCons (CLambda CStar CStar) CUnit, CPi CUnitType $ CSigma (CPi CStar CStar) CUnitType))
+              , ("popT",    (CLambda (CPi CStar CStar) $ CLambda CUnitType CUnit, CPi (CPi CStar CStar) $ CPi CUnitType CUnitType))
               , ("pushTy",  (CLambda CUnitType $ CCons (CPi CStar CStar) CUnit, CPi CUnitType $ CSigma CStar CUnitType))
               , ("id",      (CLambda CStar $ CLambda (CVar 0) $ CLambda CUnitType $ CCons (CVar 1) CUnit
                             ,CPi CStar $ CPi (CVar 0) $ CPi CUnitType $ CSigma (CVar 2) CUnitType
-                            ))
-              , ("swap",    (CLambda CStar $ CLambda CStar $ CLambda (CVar 1) $ CLambda (CVar 1) $ CLambda CUnitType $ CCons (CVar 1) (CVar 2)
-                            ,CPi CStar $ CPi CStar $ CPi (CVar 1) $ CPi (CVar 1) $ CPi CUnitType $ CSigma (CVar 1) (CVar 3)
                             ))
               , ("pass",    (CLambda CUnitType CUnit, CPi CUnitType CUnitType))
               ]
