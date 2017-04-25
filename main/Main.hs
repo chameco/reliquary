@@ -19,6 +19,7 @@ star = (CLambda CUnitType $ CCons CStar CUnit, CPi CUnitType $ CSigma CStar CUni
 unit = (CLambda CUnitType $ CCons CUnit CUnit, CPi CUnitType $ CSigma CUnitType CUnitType)
 starstar = (CLambda CUnitType $ CCons CStar $ CCons CStar CUnit, CPi CUnitType $ CSigma CStar $ CSigma CStar CUnitType)
 popStar = (CLambda CStar $ CLambda CUnitType CUnit, CPi CStar $ CPi CUnitType CUnitType)
+pass = (CLambda CUnitType CUnit, CPi CUnitType CUnitType)
 idf = (CLambda CStar $ CLambda (CVar 0) $ CLambda CUnitType $ CCons (CVar 1) CUnit, CPi CStar $ CPi (CVar 0) $ CPi CUnitType $ CSigma (CVar 2) CUnitType)
 dp = putStrLn . displayTerm
 dc = putStrLn . displayCore . check []

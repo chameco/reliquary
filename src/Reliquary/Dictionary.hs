@@ -39,7 +39,7 @@ numBreak (CSigma a as) (CSigma b bs) = numBreak as bs
 
 appendSigma :: CoreTerm -> CoreTerm -> Either GenError CoreTerm
 appendSigma CUnitType t' = return t'
-appendSigma (CSigma t ts) t' = CSigma t <$> appendSigma ts t'
+appendSigma (CSigma t ts) t' = CSigma t . shift 1 <$> appendSigma ts t'
 appendSigma o _ = throwError $ InternalError o
 
 lengthSigma :: CoreTerm -> Int
@@ -55,17 +55,17 @@ dropCons n t = iterate CSnd t !! n
 
 curryLambda :: CoreTerm -> CoreTerm -> CoreTerm
 curryLambda (CSigma it rest) bot = CLambda it $ shift 1 $ curryLambda rest bot
-curryLambda CUnitType bot = CLambda CUnitType bot
+curryLambda CUnitType bot = CLambda CUnitType $ shift 1 bot
 curryLambda _ _ = CUnit -- Internal error
 
 curryPi :: CoreTerm -> CoreTerm -> CoreTerm
 curryPi (CSigma it rest) bot = CPi it $ shift 1 $ curryPi rest bot
-curryPi CUnitType bot = CPi CUnitType bot
+curryPi CUnitType bot = CPi CUnitType $ shift 1 bot
 curryPi _ _ = CUnit -- Internal error
 
 uncurryPi :: CoreTerm -> CoreTerm
 uncurryPi (CPi CUnitType _) = CUnitType
-uncurryPi (CPi it rest) = CSigma it $ uncurryPi rest
+uncurryPi (CPi it rest) = CSigma it $ shift 1 $ uncurryPi rest
 uncurryPi _ = CUnitType
 
 uncurryRest :: CoreTerm -> CoreTerm
@@ -100,7 +100,8 @@ compose d (i, ic@(CPi it ot)) (o, oc@(CPi it' ot')) = do
             oenriched = takeCons lenot' oresult $ dropCons lenit' ienriched
 
         check [] $ dictWrap d oresult 
-        return (curryLambda finalInput $ shift 1 oenriched, curryPi finalInput finalOutput)
+        ty <- check [] $ dictWrap d $ curryLambda finalInput oenriched
+        return (curryLambda finalInput oenriched, ty)
 
 compose _ (i, _) (_, CPi{}) = throwError $ NotFunction i
 compose _ (_, _) (o, _) = throwError $ NotFunction o
