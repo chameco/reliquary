@@ -8,6 +8,7 @@ import Reliquary.Core.DeBruijn
 thunk :: CoreTerm -> CoreTerm
 thunk = CLambda CUnitType . flip CCons CUnit . shift 1
 
+-- Generate a Church-encoded integer 
 church :: Int -> CoreTerm
 church n = CLambda CStar $ CLambda (CPi (CVar 0) (CVar 1)) $ CLambda (CVar 1) $ iterate (CApply (CVar 1)) (CVar 0) !! n
 

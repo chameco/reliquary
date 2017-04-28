@@ -13,6 +13,8 @@ envLookup :: Int -> CoreEnv -> Maybe (CoreTerm, Int)
 envLookup n env = if n >= l then Nothing else Just $ env !! n where
     l = length env
 
+-- Given an environment of type associations and a term, return the type of
+-- that term (or throw a type error)
 check :: CoreEnv -> CoreTerm -> Either GenError CoreTerm
 check _ CStar = return CStar
 check _ CUnitType = return CStar

@@ -41,3 +41,8 @@ raw :: Dictionary -> Typed -> Either GenError Typed
 raw d (t, _) = do
         ty <- check [] $ dictWrap d t
         return (t, ty)
+
+wrapped :: Dictionary -> Typed -> Either GenError Typed
+wrapped d (t, _) = do
+        ty <- check [] $ dictWrap d t
+        return (dictWrap d t, ty)
