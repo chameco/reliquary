@@ -36,3 +36,8 @@ eval d base (t, _) = do
         let wrapped = dictWrap d $ CApply t base
         ty <- check [] wrapped
         return (normalize wrapped, ty)
+
+raw :: Dictionary -> Typed -> Either GenError Typed
+raw d (t, _) = do
+        ty <- check [] $ dictWrap d t
+        return (t, ty)

@@ -5,6 +5,7 @@ import Control.Monad.Except
 import Reliquary.Core.AST
 import Reliquary.Core.DeBruijn
 import Reliquary.Core.Evaluate
+import Reliquary.Core.Utils
 
 import Debug.Trace
 
@@ -25,7 +26,7 @@ check env (CApply e e') = do
         te <- check env e
         te' <- check env e'
         case te of
-            CPi t t' -> if matchTerm te' t -- $ subst 0 e' t
+            CPi t t' -> if matchTerm te' t
                             then return $ normalize $ subst 0 e' t'
                             else throwError $ Mismatch t te'
             _ -> throwError $ NotFunction te
@@ -43,7 +44,7 @@ check env (CFst p) = do
                    _  -> throwError $ NotPair tp
 check env (CSnd p) = do
         tp <- check env p
-        case tp of CSigma _ t -> return $ normalize $ subst 0 (CFst p) t
+        case tp of CSigma _ t -> return t
                    _ -> throwError $ NotPair tp
 check env (CPi p p') = do
         tp <- check env p

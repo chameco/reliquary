@@ -9,7 +9,7 @@ shift n = shiftInt 0 where
     shiftInt _ CUnit = CUnit
     shiftInt _ CRelTermType = CRelTermType
     shiftInt _ r@(CRelTerm _) = r
-    shiftInt l (CVar n') = CVar $ if n' >= l || n' < 0 then n + n' else n'
+    shiftInt l (CVar n') = CVar $ if n' >= l then n + n' else n'
     shiftInt l (CApply f t) = CApply (shiftInt l f) (shiftInt l t)
     shiftInt l (CLambda tt t) = CLambda (shiftInt l tt) (shiftInt (l + 1) t)
     shiftInt l (CCons t t') = CCons (shiftInt l t) (shiftInt l t')

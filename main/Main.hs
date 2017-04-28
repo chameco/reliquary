@@ -4,6 +4,8 @@ import System.Environment
 
 import System.Console.Haskeline
 
+import Data.List.Split
+
 import Control.Monad.Except
 
 import Reliquary.Core.AST
@@ -31,16 +33,20 @@ defaultDict = [ ("*",       (CLambda CUnitType $ CCons CStar CUnit, CPi CUnitTyp
               , ("pushT",   (CLambda CUnitType $ CCons (CLambda CStar CStar) CUnit, CPi CUnitType $ CSigma (CPi CStar CStar) CUnitType))
               , ("popT",    (CLambda (CPi CStar CStar) $ CLambda CUnitType CUnit, CPi (CPi CStar CStar) $ CPi CUnitType CUnitType))
               , ("pushTy",  (CLambda CUnitType $ CCons (CPi CStar CStar) CUnit, CPi CUnitType $ CSigma CStar CUnitType))
-              , ("id",      (CLambda CStar $ CLambda (CVar 0) $ CLambda CUnitType $ CCons (CVar 1) CUnit
-                            ,CPi CStar $ CPi (CVar 0) $ CPi CUnitType $ CSigma (CVar 2) CUnitType
-                            ))
               , ("pass",    (CLambda CUnitType CUnit, CPi CUnitType CUnitType))
               ]
 
 repl :: String -> IO ()
-repl line = case displayTyped <$> (processRepl line >>= eval defaultDict CUnit) of
-                Left e -> putStrLn ("!!! " ++ displayError e)
-                Right e -> putStrLn e
+repl line = do
+        let command = splitOn " " line
+            rest = foldr1 (\x -> \y -> x ++ " " ++ y) $ tail command
+        case head command of
+            ":u" -> case displayTyped <$> (processRepl rest >>= raw defaultDict) of
+                        Left e -> putStrLn ("!!! " ++ displayError e)
+                        Right e -> putStrLn e
+            _ -> case displayTyped <$> (processRepl line >>= eval defaultDict CUnit) of
+                     Left e -> putStrLn ("!!! " ++ displayError e)
+                     Right e -> putStrLn e
     where processRepl line = parseRepl line >>= translateAll defaultDict
 
 main :: IO ()
